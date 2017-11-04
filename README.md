@@ -1,2 +1,1 @@
-# CPaint
-Demo Paint with win32 app
+# Nguyễn Phi Cường
