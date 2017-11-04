@@ -1,0 +1,9 @@
+﻿C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\Common7\IDE\VC\VCTargets\Microsoft.CppBuild.targets(387,5): warning MSB8028: The intermediate directory (Debug\) contains files shared from another project (Win32Project1.vcxproj).  This can lead to incorrect clean and rebuild behavior.
+  Main.cpp
+c:\users\cuong phi\desktop\win32project1\win32project1\main.cpp(235): warning C4018: '<': signed/unsigned mismatch
+c:\users\cuong phi\desktop\win32project1\win32project1\main.cpp(188): warning C4101: 'hdc': unreferenced local variable
+c:\users\cuong phi\desktop\win32project1\win32project1\main.cpp(192): warning C4101: 'line': unreferenced local variable
+c:\users\cuong phi\desktop\win32project1\win32project1\main.cpp(190): warning C4101: 'shape': unreferenced local variable
+c:\users\cuong phi\desktop\win32project1\win32project1\main.cpp(193): warning C4101: 'rect': unreferenced local variable
+  Win32Project1.vcxproj -> C:\Users\Cuong Phi\Desktop\Win32Project1\Debug\PAINT--.exe
+  Win32Project1.vcxproj -> C:\Users\Cuong Phi\Desktop\Win32Project1\Debug\PAINT--.pdb (Partial PDB)
