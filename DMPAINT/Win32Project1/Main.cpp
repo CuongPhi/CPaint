@@ -69,17 +69,17 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
 
 	wcex.cbSize = sizeof(WNDCLASSEX);
 
-	wcex.style = CS_HREDRAW | CS_VREDRAW;
+	wcex.style = CS_DBLCLKS;
 	wcex.lpfnWndProc = WndProc;
 	wcex.cbClsExtra = 0;
 	wcex.cbWndExtra = 0;
 	wcex.hInstance = hInstance;
-	wcex.hIcon = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_WIN32PROJECT1));
+	wcex.hIcon = NULL;
 	wcex.hCursor = LoadCursor(nullptr, IDC_ARROW);
 	wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
 	wcex.lpszMenuName = MAKEINTRESOURCEW(IDC_WIN32PROJECT1);
 	wcex.lpszClassName = szWindowClass;
-	wcex.hIconSm = LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_SMALL));
+	wcex.hIconSm = NULL;
 
 	return RegisterClassExW(&wcex);
 }
@@ -153,8 +153,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			WCHAR buffer[200];
 			wsprintf(buffer, L"%d, %dpx", x, y);
 			SetWindowText(hWnd, buffer);
+			
+			InvalidateRect(hWnd, NULL, TRUE);
+
 		}
-		InvalidateRect(hWnd, NULL, TRUE);
+
 		break;
 
 	case WM_LBUTTONUP:
@@ -179,18 +182,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		}
 
 		isDrawing = FALSE;
-		InvalidateRect(hWnd, NULL, TRUE);
+		InvalidateRect(hWnd, NULL, FALSE);
 
 		break;
 	case WM_COMMAND:
 	{
 		int wmId = LOWORD(wParam);
-		HDC hdc;
-
-		CShape* shape;
-
-		CLine* line;
-		CRectangle* rect;
 		// Parse the menu selections:
 		switch (wmId)
 		{
@@ -232,10 +229,27 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		PAINTSTRUCT ps;
 		HDC hdc = BeginPaint(hWnd, &ps);
 
+		RECT rw;
+		GetClientRect(hWnd, &rw);
+		int win_width = rw.right - rw.left;
+		int win_height = -rw.top + rw.bottom;
+
+		CEclipse* Eclipse;
+
+		CLine* line;
+		CRectangle* Rectangle;
+		// Create an off-screen DC for double-buffering
+		HDC hdcMem = CreateCompatibleDC(hdc);
+		HBITMAP hbmMem = CreateCompatibleBitmap(hdc, win_width, win_height);
+
+		HANDLE hOld = SelectObject(hdcMem, hbmMem);
+		FillRect(hdcMem, &rw, NULL);
+
 		for (int i = 0; i < shapes.size(); i++)
 		{
 			shapes[i]->Draw(hdc);
 		}
+
 		if (isDrawing)
 		{
 			if (key != 0 && GetAsyncKeyState(VK_SHIFT) < 0)
@@ -247,19 +261,38 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				else
 					lastX = dy + currentX;
 			}
+			int index = shapes.size();
 			switch (key)
 			{
 			case 0:
-				MoveToEx(hdc, currentX, currentY, NULL);
-				LineTo(hdc, lastX, lastY);
+				
+				line = new CLine();
+				line->SetData(currentX, currentY, lastX, lastY);
+				line->Draw(hdcMem);
+			//	MoveToEx(hdcMem, currentX, currentY, NULL);
+			//	LineTo(hdcMem, lastX, lastY);
 				break;
 			case 1:
-				Rectangle(hdc, currentX, currentY, lastX, lastY);
+				Rectangle = new CRectangle();
+				Rectangle->SetData(currentX, currentY, lastX, lastY);
+				Rectangle->Draw(hdcMem);
+			//	Rectangle(hdcMem, currentX, currentY, lastX, lastY);
 				break;
 			case 2:
-				Ellipse(hdc, currentX, currentY, lastX, lastY);
+				Eclipse = new CEclipse();
+				Eclipse->SetData(currentX, currentY, lastX, lastY);
+				Eclipse->Draw(hdcMem);
+			//	Ellipse(hdcMem, currentX, currentY, lastX, lastY);
 				break;
 			}
+			ReleaseDC(hWnd, hdcMem);
+
+			BitBlt(hdc, 0, 0, win_width, win_height, hdcMem, 0, 0, SRCAND);
+			// Free-up the off-screen DC
+			SelectObject(hdcMem, hOld);
+			DeleteObject(hbmMem);
+			DeleteDC(hdcMem);
+
 		}
 		EndPaint(hWnd, &ps);
 		break;

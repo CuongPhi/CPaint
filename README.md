@@ -1,3 +1,3 @@
-#DEMO PAINT WIN32 APP
-_01/11/2017_
-### Nguyễn Phi Cường
+# DEMO PAINT WIN32 APP _01/11/2017_
+## VS2017 - WinDev 
+### Nguyễn Phi Cường 1512050
